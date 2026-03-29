@@ -27,14 +27,19 @@ const Register = () => {
     }
 
     try {
+      console.log('Attempting registration...', { email: formData.email, username: formData.username });
       await register({
         email: formData.email,
         username: formData.username,
         password: formData.password
       });
+      console.log('Registration successful!');
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.errors?.[0]?.msg || 'Registration failed');
+      console.error('Registration error:', err);
+      console.error('Error response:', err.response);
+      const errorMsg = err.response?.data?.message || err.response?.data?.errors?.[0]?.msg || err.message || 'Registration failed';
+      setError(errorMsg);
     }
   };
 

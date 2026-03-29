@@ -13,8 +13,11 @@ router.post('/register', [
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
 ], async (req, res) => {
   try {
+    console.log('Registration attempt:', req.body);
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
@@ -23,17 +26,20 @@ router.post('/register', [
     // Check if user already exists
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
+      console.log('Email already exists:', email);
       return res.status(400).json({ message: 'Email already registered' });
     }
 
     const existingUsername = await User.findOne({ username });
     if (existingUsername) {
+      console.log('Username already exists:', username);
       return res.status(400).json({ message: 'Username already taken' });
     }
 
     // Create new user
     const user = new User({ email, username, password });
     await user.save();
+    console.log('User created successfully:', user._id);
 
     // Generate token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -49,8 +55,8 @@ router.post('/register', [
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

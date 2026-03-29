@@ -47,7 +47,21 @@ app.use('/api/pages', require('./routes/pages'));
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'AlienSocial API is running' });
+  res.json({ 
+    status: 'OK', 
+    message: 'AlienSocial API is running',
+    env: {
+      hasMongoUri: !!process.env.MONGODB_URI,
+      hasJwtSecret: !!process.env.JWT_SECRET,
+      nodeEnv: process.env.NODE_ENV
+    }
+  });
+});
+
+// Test endpoint for debugging
+app.post('/api/test', (req, res) => {
+  console.log('Test endpoint hit with body:', req.body);
+  res.json({ received: req.body, message: 'Test successful' });
 });
 
 // Export for Vercel serverless
