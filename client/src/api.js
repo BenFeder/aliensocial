@@ -1,12 +1,22 @@
 import axios from 'axios';
 
-// In production, API is on same domain. In development, use localhost:5000
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? '/api' 
-  : (process.env.REACT_APP_API_URL || 'http://localhost:5000/api');
+// In production (Vercel), API is on same domain. In development, use localhost
+const API_URL = process.env.REACT_APP_API_URL || 
+  (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
+
+console.log('API URL:', API_URL);
 
 // Set default config
 axios.defaults.baseURL = API_URL;
+
+// Add response interceptor for better error handling
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
 
 // Add token to requests
 const setAuthToken = (token) => {
