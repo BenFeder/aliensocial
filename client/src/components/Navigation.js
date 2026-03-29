@@ -35,7 +35,6 @@ const Navigation = () => {
           {user ? (
             <>
               <li><Link to="/" onClick={closeMobileMenu}>Feed</Link></li>
-              <li><Link to="/create-post" onClick={closeMobileMenu}>Create Post</Link></li>
               <li><Link to="/pages" onClick={closeMobileMenu}>Pages</Link></li>
               <li><Link to="/connections" onClick={closeMobileMenu}>Connections</Link></li>
               <li><Link to={`/${user.username}`} onClick={closeMobileMenu}>Profile</Link></li>
