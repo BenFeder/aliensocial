@@ -130,6 +130,17 @@ nav .nav-links a:hover {
   z-index: 1000;
 }
 
+.search-result-header {
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--alien-green);
+  background: rgba(57, 255, 20, 0.05);
+  border-bottom: 1px solid rgba(57, 255, 20, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .search-result-item {
   display: flex;
   align-items: center;

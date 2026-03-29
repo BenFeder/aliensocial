@@ -20,10 +20,14 @@ const Login = () => {
     setError('');
 
     try {
+      console.log('Attempting login with:', { email: formData.email });
       await login(formData);
+      console.log('Login successful, navigating to home');
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      console.error('Login error:', err);
+      const errorMsg = err.response?.data?.message || err.message || 'Login failed. Please check your credentials.';
+      setError(errorMsg);
     }
   };
 

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { pagesAPI, getImageUrl } from '../api';
 
 const Pages = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [pages, setPages] = useState([]);
   const [myPages, setMyPages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -136,9 +137,10 @@ const Pages = () => {
               <img
                 src={getImageUrl(page.avatar) || 'https://via.placeholder.com/80'}
                 alt={page.name}
-                style={{ width: '80px', height: '80px', borderRadius: '10px', border: '2px solid var(--alien-green)' }}
+                style={{ width: '80px', height: '80px', borderRadius: '10px', border: '2px solid var(--alien-green)', cursor: 'pointer' }}
+                onClick={() => navigate(`/pages/${page._id}`)}
               />
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => navigate(`/pages/${page._id}`)}>
                 <h3 style={{ color: 'var(--alien-green)' }}>{page.name}</h3>
                 <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0' }}>{page.description}</p>
                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
@@ -146,7 +148,7 @@ const Pages = () => {
                 </div>
               </div>
               <div>
-                <button onClick={() => handleDeletePage(page._id)} className="btn-danger">
+                <button onClick={(e) => { e.stopPropagation(); handleDeletePage(page._id); }} className="btn-danger">
                   Delete
                 </button>
               </div>
@@ -168,9 +170,10 @@ const Pages = () => {
               <img
                 src={getImageUrl(page.avatar) || 'https://via.placeholder.com/80'}
                 alt={page.name}
-                style={{ width: '80px', height: '80px', borderRadius: '10px', border: '2px solid var(--alien-green)' }}
+                style={{ width: '80px', height: '80px', borderRadius: '10px', border: '2px solid var(--alien-green)', cursor: 'pointer' }}
+                onClick={() => navigate(`/pages/${page._id}`)}
               />
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => navigate(`/pages/${page._id}`)}>
                 <h3 style={{ color: 'var(--alien-green)' }}>{page.name}</h3>
                 <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0' }}>{page.description}</p>
                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
@@ -180,11 +183,11 @@ const Pages = () => {
               {!isOwnPage && (
                 <div>
                   {isFollowing ? (
-                    <button onClick={() => handleUnfollowPage(page._id)} className="btn-secondary">
+                    <button onClick={(e) => { e.stopPropagation(); handleUnfollowPage(page._id); }} className="btn-secondary">
                       Unfollow
                     </button>
                   ) : (
-                    <button onClick={() => handleFollowPage(page._id)}>
+                    <button onClick={(e) => { e.stopPropagation(); handleFollowPage(page._id); }}>
                       Follow
                     </button>
                   )}

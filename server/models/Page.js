@@ -12,6 +12,11 @@ const pageSchema = new mongoose.Schema({
     default: '',
     maxlength: 500
   },
+  about: {
+    type: String,
+    default: '',
+    maxlength: 2000
+  },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

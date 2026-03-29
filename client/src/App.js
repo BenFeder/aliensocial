@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import CreatePost from './pages/CreatePost';
 import Pages from './pages/Pages';
+import PageView from './pages/PageView';
 import Connections from './pages/Connections';
 import './index.css';
 
@@ -23,6 +24,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/create-post" element={<CreatePost />} />
             <Route path="/pages" element={<Pages />} />
+            <Route path="/pages/:id" element={<PageView />} />
             <Route path="/connections" element={<Connections />} />
             <Route path="/:username" element={<Profile />} />
           </Routes>

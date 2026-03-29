@@ -83,7 +83,9 @@ export const pagesAPI = {
   unfollowPage: (id) => axios.delete(`/pages/${id}/follow`),
   uploadPageAvatar: (id, formData) => axios.post(`/pages/${id}/avatar`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
-  })
+  }),
+  searchPages: (query) => axios.get('/pages/search/pages', { params: { q: query } }),
+  getPagePosts: (id) => axios.get(`/pages/${id}/posts`)
 };
 
 // Helper function to get the correct image URL

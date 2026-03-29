@@ -3,21 +3,42 @@ const router = express.Router();
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
 const User = require('../models/User');
+const Page = require('../models/Page');
 const auth = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 // Create post
 router.post('/', auth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video', maxCount: 1 }]), async (req, res) => {
   try {
-    const { content } = req.body;
+    const { content, pageId, postAsPage } = req.body;
+    
+    console.log('Received req.body:', { content: content?.substring(0, 50), pageId, postAsPage, type: typeof postAsPage });
     
     if (!content && !req.files?.image && !req.files?.video) {
       return res.status(400).json({ message: 'Post must have content, image, or video' });
     }
 
+    let page = null;
+    // If posting to a page, verify it exists
+    if (pageId) {
+      page = await Page.findById(pageId);
+      if (!page) {
+        return res.status(404).json({ message: 'Page not found' });
+      }
+      
+      const isOwner = page.owner.toString() === req.userId;
+      
+      // Only page owner can post as the page
+      if (postAsPage === 'true' && !isOwner) {
+        return res.status(403).json({ message: 'Only page owner can post as the page' });
+      }
+    }
+
     const post = new Post({
       author: req.userId,
-      content: content || ''
+      content: content || '',
+      postedOnPage: pageId || null,
+      postedAsPage: postAsPage === 'true' && pageId
     });
 
     if (req.files?.image) {
@@ -36,7 +57,18 @@ router.post('/', auth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'v
     }
 
     await post.save();
+    
+    // Add post to page's posts array if posting to a page
+    if (pageId) {
+      await Page.findByIdAndUpdate(pageId, { $push: { posts: post._id } });
+    }
+    
     await post.populate('author', 'username avatar');
+    
+    // If posted as page, also populate page info
+    if (post.postedAsPage && post.postedOnPage) {
+      await post.populate('postedOnPage', 'name avatar');
+    }
 
     res.status(201).json(post);
   } catch (error) {
@@ -54,14 +86,20 @@ router.get('/feed', auth, async (req, res) => {
     const posts = await Post.find({ author: { $in: connectionIds } })
       .sort({ createdAt: -1 })
       .populate('author', 'username avatar')
+      .populate('postedOnPage', 'name avatar')
       .populate({
         path: 'originalPost',
         populate: { path: 'author', select: 'username avatar' }
       })
       .populate({
         path: 'comments',
-        populate: { path: 'author', select: 'username avatar' },
-        options: { sort: { createdAt: 1 } }
+        populate: [
+          { path: 'author', select: 'username avatar' },
+          {
+            path: 'replies',
+            populate: { path: 'author', select: 'username avatar' }
+          }
+        ]
       })
       .limit(50);
 
@@ -84,14 +122,20 @@ router.get('/user/:username', async (req, res) => {
     const posts = await Post.find({ author: user._id })
       .sort({ createdAt: -1 })
       .populate('author', 'username avatar')
+      .populate('postedOnPage', 'name avatar')
       .populate({
         path: 'originalPost',
         populate: { path: 'author', select: 'username avatar' }
       })
       .populate({
         path: 'comments',
-        populate: { path: 'author', select: 'username avatar' },
-        options: { sort: { createdAt: 1 } }
+        populate: [
+          { path: 'author', select: 'username avatar' },
+          {
+            path: 'replies',
+            populate: { path: 'author', select: 'username avatar' }
+          }
+        ]
       });
 
     res.json(posts);
@@ -106,14 +150,20 @@ router.get('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
       .populate('author', 'username avatar')
+      .populate('postedOnPage', 'name avatar')
       .populate({
         path: 'originalPost',
         populate: { path: 'author', select: 'username avatar' }
       })
       .populate({
         path: 'comments',
-        populate: { path: 'author', select: 'username avatar' },
-        options: { sort: { createdAt: 1 } }
+        populate: [
+          { path: 'author', select: 'username avatar' },
+          {
+            path: 'replies',
+            populate: { path: 'author', select: 'username avatar' }
+          }
+        ]
       });
 
     if (!post) {
@@ -145,6 +195,7 @@ router.put('/:id', auth, async (req, res) => {
 
     await post.save();
     await post.populate('author', 'username avatar');
+    await post.populate('postedOnPage', 'name avatar');
 
     res.json(post);
   } catch (error) {
@@ -196,6 +247,7 @@ router.post('/:id/share', auth, async (req, res) => {
 
     await sharedPost.save();
     await sharedPost.populate('author', 'username avatar');
+    await sharedPost.populate('postedOnPage', 'name avatar');
     await sharedPost.populate({
       path: 'originalPost',
       populate: { path: 'author', select: 'username avatar' }

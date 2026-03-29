@@ -21,6 +21,15 @@ const postSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  postedOnPage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Page',
+    default: null
+  },
+  postedAsPage: {
+    type: Boolean,
+    default: false
+  },
   isShared: {
     type: Boolean,
     default: false

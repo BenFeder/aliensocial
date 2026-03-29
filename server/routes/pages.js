@@ -31,6 +31,28 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+// Search pages
+router.get('/search/pages', async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    if (!q || q.trim().length === 0) {
+      return res.json([]);
+    }
+
+    const pages = await Page.find({
+      name: { $regex: q, $options: 'i' }
+    })
+      .select('name description avatar')
+      .limit(10);
+
+    res.json(pages);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Get all pages (or user's pages)
 router.get('/', async (req, res) => {
   try {
@@ -81,11 +103,43 @@ router.put('/:id', auth, async (req, res) => {
 
     page.name = req.body.name || page.name;
     page.description = req.body.description !== undefined ? req.body.description : page.description;
+    page.about = req.body.about !== undefined ? req.body.about : page.about;
 
     await page.save();
     await page.populate('owner', 'username avatar');
 
     res.json(page);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get page posts
+router.get('/:id/posts', async (req, res) => {
+  try {
+    const page = await Page.findById(req.params.id);
+
+    if (!page) {
+      return res.status(404).json({ message: 'Page not found' });
+    }
+
+    const posts = await Post.find({ postedOnPage: req.params.id })
+      .sort({ createdAt: -1 })
+      .populate('author', 'username avatar')
+      .populate('postedOnPage', 'name avatar')
+      .populate({
+        path: 'comments',
+        populate: [
+          { path: 'author', select: 'username avatar' },
+          {
+            path: 'replies',
+            populate: { path: 'author', select: 'username avatar' }
+          }
+        ]
+      });
+
+    res.json(posts);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
