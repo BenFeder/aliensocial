@@ -1,15 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 require('dotenv').config();
 
 const connectDB = require('./config/db');
 
 const app = express();
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB (async, won't block)
+connectDB().catch(err => console.error('MongoDB connection failed:', err));
 
 // CORS Configuration
 const corsOptions = {
@@ -23,21 +22,26 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Create upload directories if they don't exist
-const uploadDirs = [
-  'uploads/avatars',
-  'uploads/posts/images',
-  'uploads/posts/videos'
-];
+// Remove file upload directory creation for serverless
+// Upload directories only work in development
+if (process.env.NODE_ENV !== 'production') {
+  const fs = require('fs');
+  const uploadDirs = [
+    'uploads/avatars',
+    'uploads/posts/images',
+    'uploads/posts/videos'
+  ];
+  uploadDirs.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+}
 
-uploadDirs.forEach(dir => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-});
-
-// Serve static files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Serve static files (only in development)
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+}
 
 // Routes
 app.use('/api/users', require('./routes/users'));
