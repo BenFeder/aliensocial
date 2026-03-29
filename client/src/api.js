@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5001/api';
+// In production, API is on same domain. In development, use localhost:5000
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? '/api' 
+  : (process.env.REACT_APP_API_URL || 'http://localhost:5000/api');
 
 // Set default config
 axios.defaults.baseURL = API_URL;

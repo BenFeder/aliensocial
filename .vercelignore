@@ -1,0 +1,11 @@
+node_modules
+.env
+.env.local
+.git
+*.log
+README.md
+SETUP.md
+DEPLOYMENT.md
+QUICK_DEPLOY.md
+render.yaml
+uploads

@@ -1,5 +1,6 @@
 node_modules/
 .env
+client/.env
 uploads/
 client/build/
 *.log
