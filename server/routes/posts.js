@@ -38,7 +38,7 @@ router.post('/', auth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'v
       author: req.userId,
       content: content || '',
       postedOnPage: pageId || null,
-      postedAsPage: postAsPage === 'true' && pageId
+      postedAsPage: (postAsPage === 'true' && pageId) ? true : false
     });
 
     if (req.files?.image) {
