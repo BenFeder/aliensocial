@@ -173,13 +173,23 @@ router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
     }
 
     const user = await User.findById(req.userId);
-    user.avatar = `/uploads/avatars/${req.file.filename}`;
+    
+    // Cloudinary provides the full URL in req.file.path
+    // Local disk storage provides filename, we construct the path
+    if (req.file.path && req.file.path.startsWith('http')) {
+      // Cloudinary URL
+      user.avatar = req.file.path;
+    } else {
+      // Local file path
+      user.avatar = `/uploads/avatars/${req.file.filename}`;
+    }
+    
     await user.save();
 
     res.json({ avatar: user.avatar });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Avatar upload error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

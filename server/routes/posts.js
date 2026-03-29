@@ -21,10 +21,18 @@ router.post('/', auth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'v
     });
 
     if (req.files?.image) {
-      post.image = `/uploads/posts/images/${req.files.image[0].filename}`;
+      const imageFile = req.files.image[0];
+      // Cloudinary provides URL in path, local storage uses filename
+      post.image = (imageFile.path && imageFile.path.startsWith('http')) 
+        ? imageFile.path 
+        : `/uploads/posts/images/${imageFile.filename}`;
     }
     if (req.files?.video) {
-      post.video = `/uploads/posts/videos/${req.files.video[0].filename}`;
+      const videoFile = req.files.video[0];
+      // Cloudinary provides URL in path, local storage uses filename
+      post.video = (videoFile.path && videoFile.path.startsWith('http'))
+        ? videoFile.path
+        : `/uploads/posts/videos/${videoFile.filename}`;
     }
 
     await post.save();
@@ -32,8 +40,8 @@ router.post('/', auth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'v
 
     res.status(201).json(post);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Post creation error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
