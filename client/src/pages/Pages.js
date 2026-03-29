@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { pagesAPI } from '../api';
+import { pagesAPI, getImageUrl } from '../api';
 
 const Pages = () => {
   const { user } = useContext(AuthContext);
@@ -14,8 +14,6 @@ const Pages = () => {
     description: ''
   });
   const [error, setError] = useState('');
-
-  const API_URL = 'http://localhost:5000';
 
   useEffect(() => {
     if (user) {
@@ -136,7 +134,7 @@ const Pages = () => {
           <div key={page._id} className="card">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <img
-                src={page.avatar ? `${API_URL}${page.avatar}` : 'https://via.placeholder.com/80'}
+                src={getImageUrl(page.avatar) || 'https://via.placeholder.com/80'}
                 alt={page.name}
                 style={{ width: '80px', height: '80px', borderRadius: '10px', border: '2px solid var(--alien-green)' }}
               />
@@ -168,7 +166,7 @@ const Pages = () => {
           <div key={page._id} className="card">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <img
-                src={page.avatar ? `${API_URL}${page.avatar}` : 'https://via.placeholder.com/80'}
+                src={getImageUrl(page.avatar) || 'https://via.placeholder.com/80'}
                 alt={page.name}
                 style={{ width: '80px', height: '80px', borderRadius: '10px', border: '2px solid var(--alien-green)' }}
               />

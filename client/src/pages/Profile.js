@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { authAPI, postsAPI } from '../api';
+import { authAPI, postsAPI, getImageUrl } from '../api';
 import Post from '../components/Post';
 import AvatarEditor from '../components/AvatarEditor';
 
@@ -15,8 +15,6 @@ const Profile = () => {
   const [showAvatarEditor, setShowAvatarEditor] = useState(false);
   const [bio, setBio] = useState('');
   const [editingBio, setEditingBio] = useState(false);
-
-  const API_URL = 'http://localhost:5001';
 
   useEffect(() => {
     loadProfile();
@@ -127,7 +125,7 @@ const Profile = () => {
     <div className="container">
       <div className="profile-header">
         <img
-          src={user.avatar ? `${API_URL}${user.avatar}` : 'https://via.placeholder.com/150'}
+          src={getImageUrl(user.avatar) || 'https://via.placeholder.com/150'}
           alt={user.username}
           className="avatar avatar-large"
         />

@@ -85,5 +85,21 @@ export const pagesAPI = {
   })
 };
 
+// Helper function to get the correct image URL
+// If the URL is already absolute (Cloudinary), return as-is
+// If it's a relative path (local storage), prepend the base URL
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  
+  // If the path is already a full URL (starts with http:// or https://), return it as-is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  
+  // Otherwise, prepend the API base URL (without /api suffix)
+  const baseUrl = API_URL.replace('/api', '');
+  return `${baseUrl}${imagePath}`;
+};
+
 export { setAuthToken };
 export default axios;

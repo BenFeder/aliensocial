@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { postsAPI, commentsAPI } from '../api';
+import { postsAPI, commentsAPI, getImageUrl } from '../api';
 
 const Post = ({ post: initialPost, currentUser, onDelete, onUpdate }) => {
   const [post, setPost] = useState(initialPost);
@@ -80,13 +80,12 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate }) => {
   };
 
   const displayPost = post.isShared && post.originalPost ? post.originalPost : post;
-  const API_URL = 'http://localhost:5000';
 
   return (
     <div className="post">
       <div className="post-header">
         <img
-          src={post.author.avatar ? `${API_URL}${post.author.avatar}` : 'https://via.placeholder.com/50'}
+          src={getImageUrl(post.author.avatar) || 'https://via.placeholder.com/50'}
           alt={post.author.username}
           className="post-avatar"
         />
@@ -121,12 +120,12 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate }) => {
           <div className="post-content">{displayPost.content}</div>
           
           {displayPost.image && (
-            <img src={`${API_URL}${displayPost.image}`} alt="Post" className="post-media" />
+            <img src={getImageUrl(displayPost.image)} alt="Post" className="post-media" />
           )}
           
           {displayPost.video && (
             <video controls className="post-media">
-              <source src={`${API_URL}${displayPost.video}`} type="video/mp4" />
+              <source src={getImageUrl(displayPost.video)} type="video/mp4" />
             </video>
           )}
         </>
@@ -163,7 +162,7 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate }) => {
             <div key={comment._id} className="comment">
               <div className="comment-header">
                 <img
-                  src={comment.author.avatar ? `${API_URL}${comment.author.avatar}` : 'https://via.placeholder.com/30'}
+                  src={getImageUrl(comment.author.avatar) || 'https://via.placeholder.com/30'}
                   alt={comment.author.username}
                   className="comment-avatar"
                 />
