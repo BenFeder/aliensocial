@@ -13,7 +13,7 @@ connectDB();
 
 // CORS Configuration
 const corsOptions = {
-  origin: process.env.CLIENT_URL || process.env.VERCEL_URL || 'http://localhost:3000',
+  origin: '*', // Allow all origins for now
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -54,7 +54,7 @@ app.get('/api/health', (req, res) => {
 module.exports = app;
 
 // Only start server in development
-if (process.env.NODE_ENV !== 'production') {
+if (require.main === module) {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
