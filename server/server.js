@@ -22,9 +22,11 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Remove file upload directory creation for serverless
-// Upload directories only work in development
-if (process.env.NODE_ENV !== 'production') {
+// Only create upload directories if NOT in serverless environment
+// Check for Vercel, AWS Lambda, or production environment
+const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NODE_ENV === 'production';
+
+if (!isServerless) {
   const fs = require('fs');
   const uploadDirs = [
     'uploads/avatars',
@@ -32,14 +34,16 @@ if (process.env.NODE_ENV !== 'production') {
     'uploads/posts/videos'
   ];
   uploadDirs.forEach(dir => {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    try {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    } catch (err) {
+      console.log('Could not create upload directory (expected in serverless):', dir);
     }
   });
-}
-
-// Serve static files (only in development)
-if (process.env.NODE_ENV !== 'production') {
+  
+  // Serve static files
   app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 }
 
