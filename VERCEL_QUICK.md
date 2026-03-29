@@ -23,7 +23,7 @@ git push
 5. Done! Your site is live
 
 ## 4️⃣ Custom Domain (Optional)
-- In Vercel: Settings → Domains → Add `aliensocial.com`
+- In Vercel: Settings → Domains → Add `aliensocialnetwork.com`
 - Configure DNS at your registrar (A record to 76.76.19.19)
 
 ## ⚠️ File Uploads

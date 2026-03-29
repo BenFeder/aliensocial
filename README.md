@@ -1,4 +1,4 @@
-# AlienSocial.com
+# AlienSocialNetwork.com
 
 A full-featured social networking platform built with the MERN stack.
 

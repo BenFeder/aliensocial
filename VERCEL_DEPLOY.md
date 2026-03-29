@@ -64,13 +64,13 @@ Click "Deploy" and wait 2-3 minutes.
 
 ### Step 1: Add Domain in Vercel
 1. Go to your project → "Settings" → "Domains"
-2. Add `aliensocial.com`
-3. Add `www.aliensocial.com`
+2. Add `aliensocialnetwork.com`
+3. Add `www.aliensocialnetwork.com`
 
 ### Step 2: Configure DNS
 Go to your domain registrar (Namecheap, GoDaddy, etc.) and add:
 
-**For apex domain (aliensocial.com):**
+**For apex domain (aliensocialnetwork.com):**
 - Type: `A`
 - Name: `@`
 - Value: `76.76.19.19`

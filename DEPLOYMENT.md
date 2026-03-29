@@ -1,7 +1,7 @@
 # AlienSocial Deployment Guide
 
 ## Overview
-- **Frontend**: Vercel (aliensocial.com)
+- **Frontend**: Vercel (aliensocialnetwork.com)
 - **Backend**: Render.com
 - **Database**: MongoDB Atlas (recommended)
 - **File Storage**: Note that Render's ephemeral filesystem requires external storage (Cloudinary, AWS S3, etc.) for persistent uploads
@@ -53,7 +53,7 @@ Go to "Environment" tab and add:
 - `NODE_ENV` = `production`
 - `MONGODB_URI` = `your_mongodb_atlas_connection_string`
 - `JWT_SECRET` = `generate_a_long_random_string` (use a password generator)
-- `CLIENT_URL` = `https://aliensocial.com`
+- `CLIENT_URL` = `https://aliensocialnetwork.com`
 - `PORT` = `5000` (Render will override this, but keep it)
 
 ### Step 4: Note Your Backend URL
@@ -89,9 +89,9 @@ Make sure to add it for all environments (Production, Preview, Development).
 Click "Deploy" and wait for the build to complete.
 
 ### Step 5: Configure Custom Domain
-1. Purchase `aliensocial.com` from a domain registrar (Namecheap, GoDaddy, etc.)
+1. Purchase `aliensocialnetwork.com` from a domain registrar (Namecheap, GoDaddy, etc.)
 2. In Vercel dashboard, go to your project → "Settings" → "Domains"
-3. Add `aliensocial.com` and `www.aliensocial.com`
+3. Add `aliensocialnetwork.com` and `www.aliensocialnetwork.com`
 4. Vercel will provide DNS records to add to your domain registrar:
    - **A Record**: `@` → `76.76.19.19`
    - **CNAME**: `www` → `cname.vercel-dns.com`
@@ -130,7 +130,7 @@ Make sure your backend allows requests from your domain. The code in `server/ser
 
 ## Part 6: Testing Your Deployment
 
-1. Visit `https://aliensocial.com` (or your Vercel preview URL)
+1. Visit `https://aliensocialnetwork.com` (or your Vercel preview URL)
 2. Try registering a user
 3. Try logging in
 4. Test posting, commenting, etc.

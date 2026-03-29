@@ -15,7 +15,7 @@
 5. Add Environment Variables:
    - `MONGODB_URI` = your MongoDB connection string
    - `JWT_SECRET` = any long random string
-   - `CLIENT_URL` = `https://aliensocial.com`
+   - `CLIENT_URL` = `https://aliensocialnetwork.com`
    - `NODE_ENV` = `production`
 6. Deploy and get URL: `https://your-app.onrender.com`
 
@@ -28,7 +28,7 @@
 5. Deploy!
 
 ## 4️⃣ Configure Domain (Optional)
-1. In Vercel: Settings → Domains → Add `aliensocial.com`
+1. In Vercel: Settings → Domains → Add `aliensocialnetwork.com`
 2. Add DNS records at your domain registrar
 3. Wait for propagation (up to 48 hours)
 

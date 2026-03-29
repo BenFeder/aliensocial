@@ -8,7 +8,7 @@ const Navigation = () => {
   return (
     <nav>
       <div className="nav-container">
-        <Link to="/" className="logo">AlienSocial.com</Link>
+        <Link to="/" className="logo">AlienSocialNetwork.com</Link>
         <ul className="nav-links">
           {user ? (
             <>

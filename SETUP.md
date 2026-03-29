@@ -1,4 +1,4 @@
-# AlienSocial.com - Setup Instructions
+# AlienSocialNetwork.com - Setup Instructions
 
 ## Prerequisites
 
@@ -80,7 +80,7 @@ Open your browser and navigate to:
 ### User Features
 - ✅ Register with email, username, and password (one account per email)
 - ✅ Login/Logout functionality
-- ✅ Profile at aliensocial.com/username
+- ✅ Profile at aliensocialnetwork.com/username
 - ✅ Upload and update avatar
 - ✅ Edit bio
 
