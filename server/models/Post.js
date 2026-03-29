@@ -9,7 +9,8 @@ const postSchema = new mongoose.Schema({
   content: {
     type: String,
     required: function() {
-      return !this.image && !this.video;
+      // Content is required only if there's no image, video, AND it's not a shared post
+      return !this.image && !this.video && !this.isShared;
     },
     maxlength: 5000
   },

@@ -376,7 +376,7 @@ const PageView = () => {
         <div className="card">No posts yet.</div>
       ) : (
         posts.map(post => (
-          <Post key={post._id} post={post} currentUser={user} onDelete={loadPosts} onUpdate={loadPosts} />
+          <Post key={post._id} post={post} currentUser={user} onDelete={loadPosts} onUpdate={loadPosts} onShare={loadPosts} />
         ))
       )}
     </div>

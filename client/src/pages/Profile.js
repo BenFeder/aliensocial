@@ -110,6 +110,11 @@ const Profile = () => {
     setPosts(posts.map(p => p._id === updatedPost._id ? updatedPost : p));
   };
 
+  const handleSharePost = () => {
+    // Refresh the profile to show updated share count
+    loadProfile();
+  };
+
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
@@ -221,6 +226,7 @@ const Profile = () => {
             currentUser={currentUser}
             onDelete={handleDeletePost}
             onUpdate={handleUpdatePost}
+            onShare={handleSharePost}
           />
         ))
       )}

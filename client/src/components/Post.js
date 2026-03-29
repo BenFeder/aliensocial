@@ -9,7 +9,7 @@ const formatDateTime = (dateString) => {
   return `${dateStr} at ${timeStr}`;
 };
 
-const Post = ({ post: initialPost, currentUser, onDelete, onUpdate }) => {
+const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) => {
   const navigate = useNavigate();
   const [post, setPost] = useState(initialPost);
   const [isEditing, setIsEditing] = useState(false);
@@ -55,10 +55,21 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate }) => {
 
   const handleShare = async () => {
     try {
-      await postsAPI.sharePost(post._id, '');
-      alert('Post shared to your profile!');
+      const response = await postsAPI.sharePost(post._id, '');
+      if (response.data) {
+        alert('Post shared to your profile!');
+        // Refresh the post data to update share count
+        const updatedPost = await postsAPI.getPost(post._id);
+        setPost(updatedPost.data);
+        // Notify parent component to refresh feed
+        if (onShare) {
+          onShare();
+        }
+      }
     } catch (error) {
       console.error('Error sharing post:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to share post. Please try again.';
+      alert(errorMessage);
     }
   };
 

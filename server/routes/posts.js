@@ -238,6 +238,22 @@ router.post('/:id/share', auth, async (req, res) => {
       return res.status(404).json({ message: 'Post not found' });
     }
 
+    // Prevent sharing an already shared post
+    if (originalPost.isShared) {
+      return res.status(400).json({ message: 'Cannot share a shared post. Please share the original post instead.' });
+    }
+
+    // Check if user already shared this post
+    const alreadyShared = await Post.findOne({
+      author: req.userId,
+      isShared: true,
+      originalPost: req.params.id
+    });
+
+    if (alreadyShared) {
+      return res.status(400).json({ message: 'You have already shared this post' });
+    }
+
     const sharedPost = new Post({
       author: req.userId,
       content: req.body.content || '',
@@ -246,11 +262,28 @@ router.post('/:id/share', auth, async (req, res) => {
     });
 
     await sharedPost.save();
+    
+    // Populate all required fields
     await sharedPost.populate('author', 'username avatar');
-    await sharedPost.populate('postedOnPage', 'name avatar');
+    if (sharedPost.postedOnPage) {
+      await sharedPost.populate('postedOnPage', 'name avatar');
+    }
     await sharedPost.populate({
       path: 'originalPost',
-      populate: { path: 'author', select: 'username avatar' }
+      populate: [
+        { path: 'author', select: 'username avatar' },
+        { path: 'postedOnPage', select: 'name avatar' }
+      ]
+    });
+    await sharedPost.populate({
+      path: 'comments',
+      populate: [
+        { path: 'author', select: 'username avatar' },
+        {
+          path: 'replies',
+          populate: { path: 'author', select: 'username avatar' }
+        }
+      ]
     });
 
     // Add to shares array
@@ -259,8 +292,8 @@ router.post('/:id/share', auth, async (req, res) => {
 
     res.status(201).json(sharedPost);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Share post error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

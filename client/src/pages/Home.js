@@ -34,6 +34,11 @@ const Home = () => {
     setPosts(posts.map(p => p._id === updatedPost._id ? updatedPost : p));
   };
 
+  const handleSharePost = () => {
+    // Refresh the feed to show the newly shared post
+    loadFeed();
+  };
+
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
@@ -62,6 +67,7 @@ const Home = () => {
             currentUser={user}
             onDelete={handleDeletePost}
             onUpdate={handleUpdatePost}
+            onShare={handleSharePost}
           />
         ))
       )}
