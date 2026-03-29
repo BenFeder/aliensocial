@@ -3,12 +3,32 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+// Log environment status
+console.log('Server starting with env:', {
+  hasMongoUri: !!process.env.MONGODB_URI,
+  hasJwtSecret: !!process.env.JWT_SECRET,
+  nodeEnv: process.env.NODE_ENV,
+  isVercel: !!process.env.VERCEL
+});
+
 const connectDB = require('./config/db');
 
 const app = express();
 
-// Connect to MongoDB (async, won't block)
-connectDB().catch(err => console.error('MongoDB connection failed:', err));
+// Validate required environment variables
+if (!process.env.MONGODB_URI) {
+  console.error('FATAL: MONGODB_URI is not set!');
+}
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET is not set!');
+}
+
+// In serverless, connection is handled by api/index.js
+// In development, connect immediately
+const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+if (!isServerless) {
+  connectDB().catch(err => console.error('MongoDB connection failed:', err));
+}
 
 // CORS Configuration
 const corsOptions = {
