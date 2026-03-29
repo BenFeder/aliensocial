@@ -124,6 +124,27 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
+// Search users
+router.get('/search/users', async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.trim().length < 2) {
+      return res.json([]);
+    }
+
+    const users = await User.find({
+      username: { $regex: q, $options: 'i' }
+    })
+      .select('username avatar')
+      .limit(10);
+
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Get user by username
 router.get('/:username', async (req, res) => {
   try {

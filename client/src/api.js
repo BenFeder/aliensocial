@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // In production (Vercel), API is on same domain. In development, use localhost
 const API_URL = process.env.REACT_APP_API_URL || 
-  (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
+  (window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : '/api');
 
 console.log('API URL:', API_URL);
 
@@ -46,7 +46,8 @@ export const authAPI = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   connect: (userId) => axios.post(`/users/connect/${userId}`),
-  unconnect: (userId) => axios.delete(`/users/connect/${userId}`)
+  unconnect: (userId) => axios.delete(`/users/connect/${userId}`),
+  searchUsers: (query) => axios.get('/users/search/users', { params: { q: query } })
 };
 
 // Posts API

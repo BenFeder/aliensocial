@@ -91,6 +91,66 @@ nav .nav-links a:hover {
   background: rgba(57, 255, 20, 0.1);
 }
 
+/* Search Bar */
+.search-bar-container {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+  margin: 0 2rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: var(--dark-bg);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 5px;
+  font-size: 0.95rem;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--alien-green);
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+}
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: var(--card-bg);
+  border: 2px solid var(--alien-green);
+  border-radius: 5px;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 5px 15px rgba(57, 255, 20, 0.3);
+  z-index: 1000;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-result-item:hover {
+  background: rgba(57, 255, 20, 0.1);
+}
+
+.search-result-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--alien-green);
+  object-fit: cover;
+}
+
 /* Buttons */
 button, .btn {
   background: var(--alien-green);
@@ -355,6 +415,51 @@ label {
 .profile-stat-label {
   font-size: 0.9rem;
   color: var(--text-secondary);
+}
+
+/* Connections */
+.connection-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.2s;
+}
+
+.connection-item:last-child {
+  border-bottom: none;
+}
+
+.connection-item:hover {
+  background: rgba(57, 255, 20, 0.05);
+}
+
+.connection-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+.connection-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid var(--alien-green);
+  object-fit: cover;
+}
+
+.connection-username {
+  font-weight: 600;
+  color: var(--alien-green);
+  font-size: 1.1rem;
+}
+
+.connection-remove-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
 }
 
 /* Auth Pages */

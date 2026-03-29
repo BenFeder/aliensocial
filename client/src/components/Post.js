@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { postsAPI, commentsAPI, getImageUrl } from '../api';
 
+const formatDateTime = (dateString) => {
+  const date = new Date(dateString);
+  const dateStr = date.toLocaleDateString();
+  const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return `${dateStr} at ${timeStr}`;
+};
+
 const Post = ({ post: initialPost, currentUser, onDelete, onUpdate }) => {
   const [post, setPost] = useState(initialPost);
   const [isEditing, setIsEditing] = useState(false);
@@ -92,7 +99,7 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate }) => {
         <div>
           <div className="post-author">{post.author.username}</div>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            {new Date(post.createdAt).toLocaleDateString()}
+            {formatDateTime(post.createdAt)}
           </div>
         </div>
       </div>
@@ -168,7 +175,7 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate }) => {
                 />
                 <span className="comment-author">{comment.author.username}</span>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                  {new Date(comment.createdAt).toLocaleDateString()}
+                  {formatDateTime(comment.createdAt)}
                 </span>
               </div>
               <div className="comment-content">

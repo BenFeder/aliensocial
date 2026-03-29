@@ -60,7 +60,8 @@ router.get('/feed', auth, async (req, res) => {
       })
       .populate({
         path: 'comments',
-        populate: { path: 'author', select: 'username avatar' }
+        populate: { path: 'author', select: 'username avatar' },
+        options: { sort: { createdAt: 1 } }
       })
       .limit(50);
 
@@ -89,7 +90,8 @@ router.get('/user/:username', async (req, res) => {
       })
       .populate({
         path: 'comments',
-        populate: { path: 'author', select: 'username avatar' }
+        populate: { path: 'author', select: 'username avatar' },
+        options: { sort: { createdAt: 1 } }
       });
 
     res.json(posts);
@@ -110,7 +112,8 @@ router.get('/:id', async (req, res) => {
       })
       .populate({
         path: 'comments',
-        populate: { path: 'author', select: 'username avatar' }
+        populate: { path: 'author', select: 'username avatar' },
+        options: { sort: { createdAt: 1 } }
       });
 
     if (!post) {
