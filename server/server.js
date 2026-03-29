@@ -43,9 +43,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Only create upload directories if NOT in serverless environment
-// Check for Vercel, AWS Lambda, or production environment
-const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NODE_ENV === 'production';
-
 if (!isServerless) {
   const fs = require('fs');
   const uploadDirs = [
