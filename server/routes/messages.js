@@ -4,6 +4,7 @@ const Message = require('../models/Message');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const { sanitizeUserAvatar } = require('../utils/avatarHelper');
 
 // Get all conversations for the logged-in user
 router.get('/conversations', auth, async (req, res) => {
@@ -37,7 +38,7 @@ router.get('/conversations', auth, async (req, res) => {
         });
         
         return {
-          user,
+          user: sanitizeUserAvatar(user),
           lastMessage,
           unreadCount
         };
@@ -74,13 +75,21 @@ router.get('/:userId', auth, async (req, res) => {
     .populate('sender', 'username avatar')
     .populate('recipient', 'username avatar');
 
+    // Sanitize avatars
+    const sanitizedMessages = messages.map(msg => {
+      const msgObj = msg.toObject();
+      msgObj.sender = sanitizeUserAvatar(msgObj.sender);
+      msgObj.recipient = sanitizeUserAvatar(msgObj.recipient);
+      return msgObj;
+    });
+
     // Mark messages from the other user as read
     await Message.updateMany(
       { sender: otherUserId, recipient: req.userId, read: false },
       { read: true }
     );
 
-    res.json(messages);
+    res.json(sanitizedMessages);
   } catch (error) {
     console.error('Error fetching messages:', error);
     res.status(500).json({ message: 'Server error' });
@@ -115,6 +124,11 @@ router.post('/', auth, async (req, res) => {
     await message.populate('sender', 'username avatar');
     await message.populate('recipient', 'username avatar');
 
+    // Sanitize avatars
+    const sanitizedMessage = message.toObject();
+    sanitizedMessage.sender = sanitizeUserAvatar(sanitizedMessage.sender);
+    sanitizedMessage.recipient = sanitizeUserAvatar(sanitizedMessage.recipient);
+
     // Create a notification for the recipient
     const notification = new Notification({
       recipient: recipientId,
@@ -126,7 +140,7 @@ router.post('/', auth, async (req, res) => {
 
     await notification.save();
 
-    res.status(201).json(message);
+    res.status(201).json(sanitizedMessage);
   } catch (error) {
     console.error('Error sending message:', error);
     res.status(500).json({ message: 'Server error' });

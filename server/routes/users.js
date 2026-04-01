@@ -6,6 +6,7 @@ const User = require('../models/User');
 const Notification = require('../models/Notification');
 const auth = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const { sanitizeUserAvatar, sanitizeUsersAvatars } = require('../utils/avatarHelper');
 
 // Register
 router.post('/register', [
@@ -119,7 +120,11 @@ router.get('/me', auth, async (req, res) => {
       .populate('connectionRequests', 'username avatar')
       .populate('followedPages', 'name avatar');
     
-    res.json(user);
+    const sanitizedUser = sanitizeUserAvatar(user);
+    sanitizedUser.connections = sanitizeUsersAvatars(sanitizedUser.connections);
+    sanitizedUser.connectionRequests = sanitizeUsersAvatars(sanitizedUser.connectionRequests);
+    
+    res.json(sanitizedUser);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -140,7 +145,7 @@ router.get('/search/users', async (req, res) => {
       .select('username avatar')
       .limit(10);
 
-    res.json(users);
+    res.json(sanitizeUsersAvatars(users));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -158,7 +163,12 @@ router.get('/:username', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json(user);
+    const sanitizedUser = sanitizeUserAvatar(user);
+    if (sanitizedUser.connections) {
+      sanitizedUser.connections = sanitizeUsersAvatars(sanitizedUser.connections);
+    }
+
+    res.json(sanitizedUser);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

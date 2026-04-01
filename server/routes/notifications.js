@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Notification = require('../models/Notification');
 const auth = require('../middleware/auth');
+const { sanitizeUserAvatar } = require('../utils/avatarHelper');
 
 // Get all notifications for the logged-in user
 router.get('/', auth, async (req, res) => {
@@ -12,7 +13,16 @@ router.get('/', auth, async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(50);
 
-    res.json(notifications);
+    // Sanitize avatars
+    const sanitizedNotifications = notifications.map(notif => {
+      const notifObj = notif.toObject();
+      if (notifObj.sender) {
+        notifObj.sender = sanitizeUserAvatar(notifObj.sender);
+      }
+      return notifObj;
+    });
+
+    res.json(sanitizedNotifications);
   } catch (error) {
     console.error('Error fetching notifications:', error);
     res.status(500).json({ message: 'Server error' });

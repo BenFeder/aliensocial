@@ -15,6 +15,7 @@ const Messages = () => {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('conversations');
+  const [showMobileView, setShowMobileView] = useState('sidebar'); // 'sidebar' or 'main'
 
   useEffect(() => {
     fetchConversations();
@@ -24,6 +25,9 @@ const Messages = () => {
   useEffect(() => {
     if (userId) {
       fetchMessages(userId);
+      setShowMobileView('main'); // Switch to main view on mobile when URL has userId
+    } else {
+      setShowMobileView('sidebar'); // Show sidebar when no userId in URL
     }
   }, [userId]);
 
@@ -109,12 +113,19 @@ const Messages = () => {
     navigate(`/messages/${conversation.user._id}`);
     setSelectedConversation(conversation.user);
     fetchMessages(conversation.user._id);
+    setShowMobileView('main'); // Switch to main view on mobile
   };
 
   const handleConnectionClick = (connection) => {
     navigate(`/messages/${connection._id}`);
     setSelectedConversation(connection);
     fetchMessages(connection._id);
+    setShowMobileView('main'); // Switch to main view on mobile
+  };
+
+  const handleBackToSidebar = () => {
+    setShowMobileView('sidebar');
+    navigate('/messages');
   };
 
   if (loading) {
@@ -124,7 +135,7 @@ const Messages = () => {
   return (
     <div className="messages-page">
       <div className="messages-container">
-        <div className="conversations-sidebar">
+        <div className={`conversations-sidebar ${showMobileView === 'main' ? 'hide-mobile' : ''}`}>
           <div className="conversations-header">
             <h2>Messages</h2>
             <div className="conversations-tabs">
@@ -221,10 +232,13 @@ const Messages = () => {
           </div>
         </div>
 
-        <div className="messages-main">
+        <div className={`messages-main ${showMobileView === 'sidebar' ? 'hide-mobile' : ''}`}>
           {selectedConversation ? (
             <>
               <div className="messages-header">
+                <button className="back-button-mobile" onClick={handleBackToSidebar}>
+                  ←
+                </button>
                 <div className="message-user-info">
                   {selectedConversation.avatar ? (
                     <img src={selectedConversation.avatar} alt={selectedConversation.username} />
@@ -241,9 +255,28 @@ const Messages = () => {
                   <div
                     key={message._id}
                     className={`message ${
-                      message.sender._id === user.id ? 'message-sent' : 'message-received'
+                      message.sender._id.toString() === user._id.toString() ? 'message-sent' : 'message-received'
                     }`}
                   >
+                    <div className="message-avatar">
+                      {message.sender._id.toString() === user._id.toString() ? (
+                        user.avatar ? (
+                          <img src={user.avatar} alt={user.username} />
+                        ) : (
+                          <div className="avatar-placeholder">
+                            {user.username[0].toUpperCase()}
+                          </div>
+                        )
+                      ) : (
+                        message.sender.avatar ? (
+                          <img src={message.sender.avatar} alt={message.sender.username} />
+                        ) : (
+                          <div className="avatar-placeholder">
+                            {message.sender.username[0].toUpperCase()}
+                          </div>
+                        )
+                      )}
+                    </div>
                     <div className="message-bubble">
                       <p>{message.content}</p>
                       <span className="message-time">
