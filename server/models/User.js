@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
+  connectionRequests: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
   followedPages: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Page'

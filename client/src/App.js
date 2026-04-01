@@ -10,6 +10,7 @@ import CreatePost from './pages/CreatePost';
 import Pages from './pages/Pages';
 import PageView from './pages/PageView';
 import Connections from './pages/Connections';
+import Messages from './pages/Messages';
 import './index.css';
 
 function App() {
@@ -26,6 +27,8 @@ function App() {
             <Route path="/pages" element={<Pages />} />
             <Route path="/pages/:id" element={<PageView />} />
             <Route path="/connections" element={<Connections />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/messages/:userId" element={<Messages />} />
             <Route path="/:username" element={<Profile />} />
           </Routes>
         </div>

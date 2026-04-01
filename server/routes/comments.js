@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Comment = require('../models/Comment');
 const Post = require('../models/Post');
+const Notification = require('../models/Notification');
 const auth = require('../middleware/auth');
 
 // Create comment
@@ -47,6 +48,19 @@ router.post('/', auth, async (req, res) => {
     if (!parentCommentId) {
       post.comments.push(comment._id);
       await post.save();
+    }
+
+    // Create notification for post author (if not commenting on own post)
+    if (post.author.toString() !== req.userId) {
+      const notification = new Notification({
+        recipient: post.author,
+        sender: req.userId,
+        type: 'comment',
+        post: postId,
+        comment: comment._id,
+        content: content.substring(0, 100) // Preview of the comment
+      });
+      await notification.save();
     }
 
     res.status(201).json(comment);

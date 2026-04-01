@@ -46,6 +46,8 @@ export const authAPI = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   connect: (userId) => axios.post(`/users/connect/${userId}`),
+  acceptConnection: (userId) => axios.post(`/users/connect/${userId}/accept`),
+  rejectConnection: (userId) => axios.delete(`/users/connect/${userId}/reject`),
   unconnect: (userId) => axios.delete(`/users/connect/${userId}`),
   searchUsers: (query) => axios.get('/users/search/users', { params: { q: query } })
 };
@@ -86,6 +88,23 @@ export const pagesAPI = {
   }),
   searchPages: (query) => axios.get('/pages/search/pages', { params: { q: query } }),
   getPagePosts: (id) => axios.get(`/pages/${id}/posts`)
+};
+
+// Notifications API
+export const notificationsAPI = {
+  getNotifications: () => axios.get('/notifications'),
+  getCount: () => axios.get('/notifications/count'),
+  markAsRead: (id) => axios.put(`/notifications/${id}/read`),
+  markAllAsRead: () => axios.put('/notifications/read-all'),
+  deleteNotification: (id) => axios.delete(`/notifications/${id}`)
+};
+
+// Messages API
+export const messagesAPI = {
+  getConversations: () => axios.get('/messages/conversations'),
+  getMessages: (userId) => axios.get(`/messages/${userId}`),
+  sendMessage: (data) => axios.post('/messages', data),
+  deleteMessage: (id) => axios.delete(`/messages/${id}`)
 };
 
 // Helper function to get the correct image URL

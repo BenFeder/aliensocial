@@ -82,11 +82,11 @@ const Profile = () => {
   const handleConnect = async () => {
     try {
       await authAPI.connect(user._id);
-      alert('Connected successfully!');
+      alert('Connection request sent successfully!');
       loadProfile();
     } catch (error) {
       console.error('Error connecting:', error);
-      alert(error.response?.data?.message || 'Failed to connect');
+      alert(error.response?.data?.message || 'Failed to send connection request');
     }
   };
 
@@ -199,12 +199,20 @@ const Profile = () => {
           {!isOwnProfile && currentUser && (
             <div style={{ marginTop: '1rem' }}>
               {isConnected ? (
-                <button onClick={handleUnconnect} className="btn-danger">
-                  Unconnect
-                </button>
+                <>
+                  <button onClick={handleUnconnect} className="btn-danger">
+                    Remove Connection
+                  </button>
+                  <button 
+                    onClick={() => window.location.href = `/messages/${user._id}`}
+                    style={{ marginLeft: '0.5rem' }}
+                  >
+                    Send Message
+                  </button>
+                </>
               ) : (
                 <button onClick={handleConnect}>
-                  Connect
+                  Send Connection Request
                 </button>
               )}
             </div>

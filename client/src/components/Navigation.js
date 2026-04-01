@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import SearchBar from './SearchBar';
+import Notifications from './Notifications';
 
 const Navigation = () => {
   const { user, logout } = useContext(AuthContext);
@@ -37,6 +38,10 @@ const Navigation = () => {
               <li><Link to="/" onClick={closeMobileMenu}>Feed</Link></li>
               <li><Link to="/pages" onClick={closeMobileMenu}>Pages</Link></li>
               <li><Link to="/connections" onClick={closeMobileMenu}>Connections</Link></li>
+              <li><Link to="/messages" onClick={closeMobileMenu}>Messages</Link></li>
+              <li className="notification-nav-item">
+                <Notifications />
+              </li>
               <li><Link to={`/${user.username}`} onClick={closeMobileMenu}>Profile</Link></li>
               <li><button onClick={handleLogout}>Logout</button></li>
             </>

@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const auth = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
@@ -115,6 +116,7 @@ router.get('/me', auth, async (req, res) => {
     const user = await User.findById(req.userId)
       .select('-password')
       .populate('connections', 'username avatar')
+      .populate('connectionRequests', 'username avatar')
       .populate('followedPages', 'name avatar');
     
     res.json(user);
@@ -214,7 +216,7 @@ router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
   }
 });
 
-// Connect with user
+// Send connection request
 router.post('/connect/:userId', auth, async (req, res) => {
   try {
     const currentUser = await User.findById(req.userId);
@@ -224,17 +226,103 @@ router.post('/connect/:userId', auth, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    if (req.userId === req.params.userId) {
+      return res.status(400).json({ message: 'Cannot connect with yourself' });
+    }
+
     if (currentUser.connections.includes(req.params.userId)) {
       return res.status(400).json({ message: 'Already connected' });
     }
 
-    currentUser.connections.push(req.params.userId);
-    targetUser.connections.push(req.userId);
+    if (targetUser.connectionRequests.includes(req.userId)) {
+      return res.status(400).json({ message: 'Connection request already sent' });
+    }
 
-    await currentUser.save();
+    // Add connection request to target user
+    targetUser.connectionRequests.push(req.userId);
     await targetUser.save();
 
-    res.json({ message: 'Connected successfully' });
+    // Create notification for target user
+    const notification = new Notification({
+      recipient: req.params.userId,
+      sender: req.userId,
+      type: 'connection',
+      content: 'wants to connect with you'
+    });
+    await notification.save();
+
+    res.json({ message: 'Connection request sent successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Accept connection request
+router.post('/connect/:userId/accept', auth, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.userId);
+    const requestingUser = await User.findById(req.params.userId);
+
+    if (!requestingUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if there's a pending request
+    if (!currentUser.connectionRequests.includes(req.params.userId)) {
+      return res.status(400).json({ message: 'No connection request from this user' });
+    }
+
+    // Add to connections for both users
+    currentUser.connections.push(req.params.userId);
+    requestingUser.connections.push(req.userId);
+
+    // Remove from connection requests
+    currentUser.connectionRequests = currentUser.connectionRequests.filter(
+      id => id.toString() !== req.params.userId
+    );
+
+    await currentUser.save();
+    await requestingUser.save();
+
+    // Delete the connection notification
+    await Notification.deleteOne({
+      recipient: req.userId,
+      sender: req.params.userId,
+      type: 'connection'
+    });
+
+    res.json({ message: 'Connection request accepted' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Reject connection request
+router.delete('/connect/:userId/reject', auth, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.userId);
+
+    if (!currentUser.connectionRequests.includes(req.params.userId)) {
+      return res.status(400).json({ message: 'No connection request from this user' });
+    }
+
+    // Remove from connection requests
+    currentUser.connectionRequests = currentUser.connectionRequests.filter(
+      id => id.toString() !== req.params.userId
+    );
+
+    await currentUser.save();
+
+    // Delete the connection notification
+    await Notification.deleteOne({
+      recipient: req.userId,
+      sender: req.params.userId,
+      type: 'connection'
+    });
+
+    res.json({ message: 'Connection request rejected' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

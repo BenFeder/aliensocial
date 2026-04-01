@@ -92,6 +92,11 @@ nav .nav-links {
   list-style: none;
 }
 
+nav .nav-links .notification-nav-item {
+  display: flex;
+  align-items: center;
+}
+
 nav .nav-links a {
   font-weight: 500;
   transition: all 0.3s;
