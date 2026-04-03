@@ -35,11 +35,9 @@ const ResetPassword = () => {
     setIsSubmitting(true);
 
     try {
-      console.log('Attempting password reset with token:', token);
       await axios.post(`/users/reset-password/${token}`, {
         password: formData.password
       });
-      console.log('Password reset successful');
       setSuccess(true);
       
       // Redirect to login after 3 seconds
@@ -48,7 +46,6 @@ const ResetPassword = () => {
       }, 3000);
     } catch (err) {
       console.error('Reset password error:', err);
-      console.error('Error response:', err.response);
       setError(err.response?.data?.message || 'Failed to reset password. The link may be expired or invalid.');
     } finally {
       setIsSubmitting(false);
