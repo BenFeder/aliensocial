@@ -137,9 +137,14 @@ const Login = () => {
             </div>
             <div className="modal-content">
               {forgotPasswordMessage ? (
-                <div className="success-message" style={{ color: '#39ff14', marginBottom: '20px' }}>
-                  {forgotPasswordMessage}
-                </div>
+                <>
+                  <div className="success-message" style={{ color: '#39ff14', marginBottom: '10px' }}>
+                    {forgotPasswordMessage}
+                  </div>
+                  <div style={{ color: '#ffa500', fontSize: '0.9em', marginBottom: '20px', padding: '10px', backgroundColor: 'rgba(255, 165, 0, 0.1)', borderRadius: '5px' }}>
+                    ⚠️ Please check your spam folder and wait up to 10 minutes to receive your password reset link email.
+                  </div>
+                </>
               ) : (
                 <form onSubmit={handleForgotPasswordSubmit}>
                   <p style={{ marginBottom: '15px' }}>
