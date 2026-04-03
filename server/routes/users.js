@@ -517,4 +517,75 @@ router.put('/change-password', auth, [
   }
 });
 
+// Search taggable entities (connections and followed pages) for mentions
+router.get('/mentions/search', auth, async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    // Get current user to access their connections and followed pages
+    const currentUser = await User.findById(req.userId)
+      .select('connections')
+      .populate('connections', 'username name avatar');
+
+    // Search in user's connections
+    let connections;
+    if (!q || q.trim().length < 1) {
+      // Show all connections if no query
+      connections = currentUser.connections;
+    } else {
+      // Filter by query
+      connections = currentUser.connections.filter(user => {
+        const username = user.username?.toLowerCase() || '';
+        const name = user.name?.toLowerCase() || '';
+        const query = q.toLowerCase();
+        return username.includes(query) || name.includes(query);
+      });
+    }
+
+    // Search in followed pages
+    const Page = require('../models/Page');
+    let followedPages;
+    if (!q || q.trim().length < 1) {
+      // Show all followed pages if no query
+      followedPages = await Page.find({
+        followers: req.userId
+      })
+        .select('name avatar')
+        .limit(10);
+    } else {
+      // Filter by query
+      followedPages = await Page.find({
+        followers: req.userId,
+        name: { $regex: q, $options: 'i' }
+      })
+        .select('name avatar')
+        .limit(10);
+    }
+
+    // Format results - connections as users, pages as pages
+    const userResults = connections.slice(0, 10).map(user => ({
+      id: user._id,
+      type: 'user',
+      username: user.username,
+      name: user.name || user.username,
+      avatar: user.avatar
+    }));
+
+    const pageResults = followedPages.map(page => ({
+      id: page._id,
+      type: 'page',
+      name: page.name,
+      avatar: page.avatar
+    }));
+
+    // Combine and limit to 10 total results
+    const results = [...userResults, ...pageResults].slice(0, 10);
+
+    res.json(sanitizeUsersAvatars(results));
+  } catch (error) {
+    console.error('Mentions search error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

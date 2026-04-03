@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { postsAPI, pagesAPI } from '../api';
+import MentionInput from '../components/MentionInput';
 
 const CreatePost = () => {
   const { user } = useContext(AuthContext);
@@ -12,6 +13,7 @@ const CreatePost = () => {
     video: null,
     pageId: ''
   });
+  const [mentions, setMentions] = useState([]);
   const [myPages, setMyPages] = useState([]);
   const [followedPages, setFollowedPages] = useState([]);
   const [error, setError] = useState('');
@@ -48,6 +50,11 @@ const CreatePost = () => {
     }
   };
 
+  const handleContentChange = (value, mentionsData) => {
+    setFormData({ ...formData, content: value });
+    setMentions(mentionsData || []);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -65,6 +72,9 @@ const CreatePost = () => {
       if (formData.image) data.append('image', formData.image);
       if (formData.video) data.append('video', formData.video);
       if (formData.pageId) data.append('pageId', formData.pageId);
+      if (mentions.length > 0) {
+        data.append('mentions', JSON.stringify(mentions));
+      }
 
       await postsAPI.createPost(data);
       
@@ -122,12 +132,11 @@ const CreatePost = () => {
           )}
           
           <label>Content</label>
-          <textarea
-            name="content"
+          <MentionInput
             value={formData.content}
-            onChange={handleChange}
-            placeholder="What's on your mind?"
-            rows="6"
+            onChange={handleContentChange}
+            placeholder="What's on your mind? Tag connections and pages with @"
+            className="post-input"
           />
           
           <label>Image (optional)</label>

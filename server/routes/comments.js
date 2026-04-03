@@ -8,7 +8,7 @@ const auth = require('../middleware/auth');
 // Create comment
 router.post('/', auth, async (req, res) => {
   try {
-    const { postId, content, parentCommentId } = req.body;
+    const { postId, content, parentCommentId, mentions } = req.body;
 
     if (!content) {
       return res.status(400).json({ message: 'Comment content is required' });
@@ -33,6 +33,11 @@ router.post('/', auth, async (req, res) => {
       content,
       parentComment: parentCommentId || null
     });
+
+    // Add mentions if provided
+    if (mentions) {
+      comment.mentions = mentions;
+    }
 
     await comment.save();
     await comment.populate('author', 'username name avatar');

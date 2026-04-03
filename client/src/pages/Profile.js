@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { authAPI, postsAPI, getImageUrl } from '../api';
 import Post from '../components/Post';
 import AvatarEditor from '../components/AvatarEditor';
+import MentionInput from '../components/MentionInput';
 
 const Profile = () => {
   const { username } = useParams();
@@ -24,6 +25,9 @@ const Profile = () => {
   });
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [postContent, setPostContent] = useState('');
+  const [postMentions, setPostMentions] = useState([]);
+  const [postError, setPostError] = useState('');
 
   useEffect(() => {
     loadProfile();
@@ -165,6 +169,28 @@ const Profile = () => {
     loadProfile();
   };
 
+  const handleCreatePost = async (e) => {
+    e.preventDefault();
+    if (!postContent.trim() && postMentions.length === 0) return;
+    
+    try {
+      const formData = new FormData();
+      formData.append('content', postContent);
+      if (postMentions.length > 0) {
+        formData.append('mentions', JSON.stringify(postMentions));
+      }
+      
+      const response = await postsAPI.createPost(formData);
+      setPosts([response.data, ...posts]);
+      setPostContent('');
+      setPostMentions([]);
+      setPostError('');
+    } catch (error) {
+      console.error('Error creating post:', error);
+      setPostError(error.response?.data?.message || 'Failed to create post');
+    }
+  };
+
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
@@ -174,7 +200,7 @@ const Profile = () => {
   }
 
   const isOwnProfile = currentUser && currentUser.username === username;
-  const isConnected = currentUser && user.connections?.some(c => c._id === currentUser.id);
+  const isConnected = currentUser && currentUser.connections?.some(c => c._id === user._id || c.username === user.username);
 
   return (
     <div className="container">
@@ -338,14 +364,24 @@ const Profile = () => {
             <div style={{ marginTop: '1rem' }}>
               {isConnected ? (
                 <>
-                  <button onClick={handleUnconnect} className="btn-danger">
-                    Remove Connection
+                  <button 
+                    style={{ backgroundColor: 'var(--alien-green)', color: 'black', cursor: 'default' }}
+                    disabled
+                  >
+                    Connected!
                   </button>
                   <button 
                     onClick={() => window.location.href = `/messages/${user._id}`}
                     style={{ marginLeft: '0.5rem' }}
                   >
                     Send Message
+                  </button>
+                  <button 
+                    onClick={handleUnconnect} 
+                    className="btn-danger"
+                    style={{ marginLeft: '0.5rem' }}
+                  >
+                    Disconnect
                   </button>
                 </>
               ) : (
@@ -359,6 +395,25 @@ const Profile = () => {
       </div>
 
       <h2 style={{ color: 'var(--alien-green)', marginBottom: '1.5rem' }}>Posts</h2>
+      
+      {isConnected && currentUser && (
+        <div className="card" style={{ marginBottom: '1.5rem' }}>
+          <h3 style={{ marginBottom: '1rem' }}>Write on {user.name || user.username}'s profile</h3>
+          {postError && <div className="error">{postError}</div>}
+          <form onSubmit={handleCreatePost}>
+            <MentionInput
+              value={postContent}
+              onChange={(value, mentions) => {
+                setPostContent(value);
+                setPostMentions(mentions || []);
+              }}
+              placeholder="What's on your mind? Tag with @"
+              className="comment-input"
+            />
+            <button type="submit" style={{ marginTop: '0.5rem' }}>Post</button>
+          </form>
+        </div>
+      )}
       
       {posts.length === 0 ? (
         <div className="card" style={{ textAlign: 'center' }}>

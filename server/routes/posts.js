@@ -10,9 +10,9 @@ const upload = require('../middleware/upload');
 // Create post
 router.post('/', auth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video', maxCount: 1 }]), async (req, res) => {
   try {
-    const { content, pageId, postAsPage } = req.body;
+    const { content, pageId, postAsPage, mentions } = req.body;
     
-    console.log('Received req.body:', { content: content?.substring(0, 50), pageId, postAsPage, type: typeof postAsPage });
+    console.log('Received req.body:', { content: content?.substring(0, 50), pageId, postAsPage, mentions, type: typeof postAsPage });
     
     if (!content && !req.files?.image && !req.files?.video) {
       return res.status(400).json({ message: 'Post must have content, image, or video' });
@@ -40,6 +40,16 @@ router.post('/', auth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'v
       postedOnPage: pageId || null,
       postedAsPage: (postAsPage === 'true' && pageId) ? true : false
     });
+
+    // Add mentions if provided
+    if (mentions) {
+      try {
+        const mentionsArray = typeof mentions === 'string' ? JSON.parse(mentions) : mentions;
+        post.mentions = mentionsArray;
+      } catch (error) {
+        console.error('Error parsing mentions:', error);
+      }
+    }
 
     if (req.files?.image) {
       const imageFile = req.files.image[0];

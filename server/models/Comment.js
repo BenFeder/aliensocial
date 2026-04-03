@@ -25,6 +25,19 @@ const commentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Comment'
   }],
+  mentions: [{
+    type: {
+      type: String,
+      enum: ['user', 'page'],
+      required: true
+    },
+    entityId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      refPath: 'mentions.type'
+    },
+    text: String
+  }],
   createdAt: {
     type: Date,
     default: Date.now

@@ -282,6 +282,23 @@ textarea {
   font-family: inherit;
 }
 
+/* Mention input variants */
+textarea.post-input {
+  min-height: 120px;
+}
+
+textarea.comment-input,
+textarea.reply-input {
+  min-height: 60px;
+  font-size: 0.95rem;
+  padding: 0.6rem;
+}
+
+textarea.reply-input {
+  min-height: 50px;
+  font-size: 0.9rem;
+}
+
 label {
   font-weight: 500;
   color: var(--text-secondary);

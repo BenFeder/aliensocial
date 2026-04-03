@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { postsAPI, commentsAPI, getImageUrl } from '../api';
+import MentionText from './MentionText';
+import MentionInput from './MentionInput';
 
 const formatDateTime = (dateString) => {
   const date = new Date(dateString);
@@ -15,11 +17,13 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) =
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
   const [commentContent, setCommentContent] = useState('');
+  const [commentMentions, setCommentMentions] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentContent, setEditingCommentContent] = useState('');
   const [replyingToCommentId, setReplyingToCommentId] = useState(null);
   const [replyContent, setReplyContent] = useState('');
+  const [replyMentions, setReplyMentions] = useState([]);
 
   const handleLike = async () => {
     try {
@@ -80,10 +84,12 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) =
     try {
       const response = await commentsAPI.createComment({
         postId: post._id,
-        content: commentContent
+        content: commentContent,
+        mentions: commentMentions
       });
       setPost({ ...post, comments: [...post.comments, response.data] });
       setCommentContent('');
+      setCommentMentions([]);
     } catch (error) {
       console.error('Error creating comment:', error);
     }
@@ -123,12 +129,14 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) =
       await commentsAPI.createComment({
         postId: post._id,
         content: replyContent,
-        parentCommentId
+        parentCommentId,
+        mentions: replyMentions
       });
       // Refresh comments from server to get updated list with replies
       const response = await commentsAPI.getPostComments(post._id);
       setPost({ ...post, comments: response.data });
       setReplyContent('');
+      setReplyMentions([]);
       setReplyingToCommentId(null);
     } catch (error) {
       console.error('Error creating reply:', error);
@@ -142,6 +150,14 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) =
     ? { username: post.postedOnPage.name, avatar: post.postedOnPage.avatar, isPage: true }
     : { username: post.author.username, avatar: post.author.avatar, isPage: false };
 
+  const handleAuthorClick = () => {
+    if (displayAuthor.isPage && post.postedOnPage) {
+      navigate(`/pages/${post.postedOnPage._id}`);
+    } else if (post.author.username) {
+      navigate(`/${post.author.username}`);
+    }
+  };
+
   return (
     <div className="post">
       <div className="post-header">
@@ -149,9 +165,17 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) =
           src={getImageUrl(displayAuthor.avatar) || 'https://via.placeholder.com/50'}
           alt={displayAuthor.username}
           className="post-avatar"
+          onClick={handleAuthorClick}
+          style={{ cursor: 'pointer' }}
         />
         <div style={{ flex: 1 }}>
-          <div className="post-author">{displayAuthor.username}</div>
+          <div 
+            className="post-author" 
+            onClick={handleAuthorClick}
+            style={{ cursor: 'pointer' }}
+          >
+            {displayAuthor.username}
+          </div>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
             {formatDateTime(post.createdAt)}
           </div>
@@ -212,7 +236,9 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) =
         </div>
       ) : (
         <>
-          <div className="post-content">{displayPost.content}</div>
+          <div className="post-content">
+            <MentionText content={displayPost.content} mentions={displayPost.mentions} />
+          </div>
           
           {displayPost.image && (
             <img src={getImageUrl(displayPost.image)} alt="Post" className="post-media" />
@@ -242,14 +268,16 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) =
         <div style={{ marginTop: '1rem' }}>
           {currentUser && (
             <form onSubmit={handleComment} style={{ marginBottom: '1rem' }}>
-              <input
-                type="text"
-                placeholder="Write a comment..."
+              <MentionInput
                 value={commentContent}
-                onChange={(e) => setCommentContent(e.target.value)}
-                style={{ width: '100%', marginBottom: '0.5rem' }}
+                onChange={(value, mentions) => {
+                  setCommentContent(value);
+                  setCommentMentions(mentions || []);
+                }}
+                placeholder="Write a comment... Tag with @"
+                className="comment-input"
               />
-              <button type="submit">Post Comment</button>
+              <button type="submit" style={{ marginTop: '0.5rem' }}>Post Comment</button>
             </form>
           )}
 
@@ -260,8 +288,16 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) =
                   src={getImageUrl(comment.author.avatar) || 'https://via.placeholder.com/30'}
                   alt={comment.author.username}
                   className="comment-avatar"
+                  onClick={() => navigate(`/${comment.author.username}`)}
+                  style={{ cursor: 'pointer' }}
                 />
-                <span className="comment-author">{comment.author.username}</span>
+                <span 
+                  className="comment-author"
+                  onClick={() => navigate(`/${comment.author.username}`)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {comment.author.username}
+                </span>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                   {formatDateTime(comment.createdAt)}
                 </span>
@@ -290,7 +326,7 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) =
                   </button>
                 </div>
               ) : (
-                <>
+                <><MentionText content={comment.content} mentions={comment.mentions} />
                   <div className="comment-content">
                     {comment.content}
                   </div>
@@ -331,14 +367,16 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) =
                   {/* Reply form */}
                   {replyingToCommentId === comment._id && (
                     <form onSubmit={(e) => handleReply(e, comment._id)} style={{ marginTop: '0.5rem' }}>
-                      <input
-                        type="text"
-                        placeholder={`Reply to ${comment.author.username}...`}
+                      <MentionInput
                         value={replyContent}
-                        onChange={(e) => setReplyContent(e.target.value)}
-                        style={{ width: '100%', marginBottom: '0.5rem' }}
+                        onChange={(value, mentions) => {
+                          setReplyContent(value);
+                          setReplyMentions(mentions || []);
+                        }}
+                        placeholder={`Reply to ${comment.author.username}... Tag with @`}
+                        className="reply-input"
                       />
-                      <button type="submit" style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem' }}>
+                      <button type="submit" style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', marginTop: '0.5rem' }}>
                         Post Reply
                       </button>
                       <button 
@@ -365,8 +403,16 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) =
                               src={getImageUrl(reply.author.avatar) || 'https://via.placeholder.com/30'}
                               alt={reply.author.username}
                               className="comment-avatar"
+                              onClick={() => navigate(`/${reply.author.username}`)}
+                              style={{ cursor: 'pointer' }}
                             />
-                            <span className="comment-author">{reply.author.username}</span>
+                            <span 
+                              className="comment-author"
+                              onClick={() => navigate(`/${reply.author.username}`)}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              {reply.author.username}
+                            </span>
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                               {formatDateTime(reply.createdAt)}
                             </span>
@@ -397,7 +443,7 @@ const Post = ({ post: initialPost, currentUser, onDelete, onUpdate, onShare }) =
                           ) : (
                             <>
                               <div className="comment-content">
-                                {reply.content}
+                                <MentionText content={reply.content} mentions={reply.mentions} />
                               </div>
                               {currentUser && (reply.author._id === currentUser.id || reply.author._id === currentUser._id) && (
                                 <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
