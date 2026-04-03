@@ -21,7 +21,14 @@ const Navigation = () => {
     <>
     <nav>
       <div className="nav-container">
-        <Link to="/" className="logo">Alien Social Network</Link>
+        <Link to="/" className="logo">
+          <img 
+            src="/ASNlogo.png" 
+            alt="Alien Social Network Logo" 
+            className="logo-image"
+          />
+          <span className="logo-text">Alien Social Network</span>
+        </Link>
         
         {/* Hamburger menu button for mobile */}
         <button 

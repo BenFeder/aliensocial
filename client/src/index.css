@@ -83,6 +83,21 @@ nav .logo {
   font-weight: bold;
   color: var(--alien-green);
   text-shadow: 0 0 10px var(--alien-green);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  text-decoration: none;
+}
+
+nav .logo-image {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px var(--alien-green));
+}
+
+nav .logo-text {
+  white-space: nowrap;
 }
 
 nav .nav-links {
@@ -625,6 +640,10 @@ label {
     font-size: 1.3rem;
   }
 
+  nav .logo-image {
+    height: 32px;
+  }
+
   nav .nav-container {
     flex-wrap: wrap;
     position: relative;
@@ -835,9 +854,20 @@ label {
     order: 1;
     flex: 0 0 auto;
     white-space: nowrap;
+    overflow: visible;
+    max-width: none;
+    gap: 0.5rem;
+  }
+
+  nav .logo-image {
+    height: 28px;
+  }
+
+  nav .logo-text {
+    display: inline;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 180px;
+    max-width: 150px;
   }
 
   nav .nav-container {
@@ -1118,6 +1148,10 @@ label {
 
   nav .logo {
     font-size: 1rem;
+  }
+
+  nav .logo-image {
+    height: 24px;
   }
 
   .mobile-menu-toggle {
