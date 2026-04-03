@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const PasswordReset = require('../models/PasswordReset');
 const auth = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const { sanitizeUserAvatar, sanitizeUsersAvatars } = require('../utils/avatarHelper');
+const { sendPasswordResetEmail } = require('../utils/email');
 
 // Register
 router.post('/register', [
@@ -369,6 +372,147 @@ router.delete('/connect/:userId', auth, async (req, res) => {
     res.json({ message: 'Unconnected successfully' });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Forgot password - send reset email
+router.post('/forgot-password', [
+  body('email').isEmail().withMessage('Enter a valid email')
+], async (req, res) => {
+  try {
+    console.log('Forgot password request received for:', req.body.email);
+    
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email } = req.body;
+
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      console.log('User not found for email:', email);
+      // Don't reveal if user exists or not for security
+      return res.json({ message: 'If an account with that email exists, a password reset link has been sent.' });
+    }
+
+    console.log('User found, creating reset token for:', user._id);
+
+    // Delete any existing reset tokens for this user
+    await PasswordReset.deleteMany({ userId: user._id });
+
+    // Generate secure random token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    console.log('Generated reset token');
+
+    // Create password reset record (expires in 1 hour)
+    const passwordReset = new PasswordReset({
+      userId: user._id,
+      token: resetToken,
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+    });
+    await passwordReset.save();
+    console.log('Password reset record saved');
+
+    // Send email with reset link
+    await sendPasswordResetEmail(user.email, resetToken);
+    console.log('Password reset email sent/logged');
+
+    res.json({ message: 'If an account with that email exists, a password reset link has been sent.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ message: 'Server error', details: error.message });
+  }
+});
+
+// Reset password with token
+router.post('/reset-password/:token', [
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+], async (req, res) => {
+  try {
+    console.log('Reset password request received for token:', req.params.token);
+    
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Find valid reset token
+    const passwordReset = await PasswordReset.findOne({
+      token,
+      expiresAt: { $gt: new Date() } // Not expired
+    });
+
+    if (!passwordReset) {
+      console.log('Invalid or expired token:', token);
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    console.log('Valid token found for user:', passwordReset.userId);
+
+    // Find user and update password
+    const user = await User.findById(passwordReset.userId);
+    if (!user) {
+      console.log('User not found:', passwordReset.userId);
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.password = password; // Will be hashed by pre-save hook
+    await user.save();
+    console.log('Password updated successfully for user:', user._id);
+
+    // Delete the used reset token
+    await PasswordReset.deleteOne({ _id: passwordReset._id });
+    console.log('Reset token deleted');
+
+    res.json({ message: 'Password reset successfully' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ message: 'Server error', details: error.message });
+  }
+});
+
+// Change password (requires authentication)
+router.put('/change-password', auth, [
+  body('currentPassword').exists().withMessage('Current password is required'),
+  body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    // Get user
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Verify current password
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    // Update password
+    user.password = newPassword; // Will be hashed by pre-save hook
+    await user.save();
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Change password error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

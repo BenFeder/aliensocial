@@ -11,6 +11,7 @@ import Pages from './pages/Pages';
 import PageView from './pages/PageView';
 import Connections from './pages/Connections';
 import Messages from './pages/Messages';
+import ResetPassword from './pages/ResetPassword';
 import './index.css';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/create-post" element={<CreatePost />} />
             <Route path="/pages" element={<Pages />} />
             <Route path="/pages/:id" element={<PageView />} />

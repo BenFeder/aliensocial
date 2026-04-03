@@ -49,7 +49,8 @@ export const authAPI = {
   acceptConnection: (userId) => axios.post(`/users/connect/${userId}/accept`),
   rejectConnection: (userId) => axios.delete(`/users/connect/${userId}/reject`),
   unconnect: (userId) => axios.delete(`/users/connect/${userId}`),
-  searchUsers: (query) => axios.get('/users/search/users', { params: { q: query } })
+  searchUsers: (query) => axios.get('/users/search/users', { params: { q: query } }),
+  changePassword: (data) => axios.put('/users/change-password', data)
 };
 
 // Posts API

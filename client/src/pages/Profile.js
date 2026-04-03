@@ -16,6 +16,14 @@ const Profile = () => {
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [editingProfile, setEditingProfile] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
 
   useEffect(() => {
     loadProfile();
@@ -78,6 +86,46 @@ const Profile = () => {
       alert('Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    // Validation
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+
+    try {
+      await authAPI.changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+      
+      setPasswordSuccess('Password changed successfully!');
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      
+      // Close the form after 2 seconds
+      setTimeout(() => {
+        setShowChangePassword(false);
+        setPasswordSuccess('');
+      }, 2000);
+    } catch (error) {
+      console.error('Error changing password:', error);
+      setPasswordError(error.response?.data?.message || 'Failed to change password');
     }
   };
 
@@ -213,6 +261,76 @@ const Profile = () => {
                   Change Avatar
                 </button>
               </label>
+              <button 
+                type="button"
+                onClick={() => setShowChangePassword(!showChangePassword)}
+                style={{ marginLeft: '0.5rem' }}
+              >
+                {showChangePassword ? 'Cancel' : 'Change Password'}
+              </button>
+            </div>
+          )}
+
+          {isOwnProfile && showChangePassword && (
+            <div className="card" style={{ marginTop: '1rem', padding: '1rem' }}>
+              <h3 style={{ marginBottom: '1rem', fontSize: '1.1em' }}>Change Password</h3>
+              {passwordError && (
+                <div className="error" style={{ marginBottom: '1rem' }}>
+                  {passwordError}
+                </div>
+              )}
+              {passwordSuccess && (
+                <div className="success-message" style={{ 
+                  color: '#39ff14', 
+                  marginBottom: '1rem',
+                  padding: '0.75rem',
+                  background: 'rgba(57, 255, 20, 0.1)',
+                  borderRadius: '4px'
+                }}>
+                  {passwordSuccess}
+                </div>
+              )}
+              <form onSubmit={handleChangePassword}>
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: '600' }}>
+                    Current Password
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                    required
+                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
+                  />
+                </div>
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: '600' }}>
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    required
+                    placeholder="At least 6 characters"
+                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
+                  />
+                </div>
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: '600' }}>
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    required
+                    placeholder="Re-enter new password"
+                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
+                  />
+                </div>
+                <button type="submit">Update Password</button>
+              </form>
             </div>
           )}
 
