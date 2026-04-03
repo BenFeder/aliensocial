@@ -30,7 +30,7 @@ router.get('/conversations', auth, async (req, res) => {
     // Get user details for each conversation
     const conversations = await Promise.all(
       Array.from(conversationMap.entries()).map(async ([userId, lastMessage]) => {
-        const user = await User.findById(userId).select('username avatar');
+        const user = await User.findById(userId).select('username name avatar');
         const unreadCount = await Message.countDocuments({
           sender: userId,
           recipient: req.userId,
@@ -72,8 +72,8 @@ router.get('/:userId', auth, async (req, res) => {
       ]
     })
     .sort({ createdAt: 1 })
-    .populate('sender', 'username avatar')
-    .populate('recipient', 'username avatar');
+    .populate('sender', 'username name avatar')
+    .populate('recipient', 'username name avatar');
 
     // Sanitize avatars
     const sanitizedMessages = messages.map(msg => {
@@ -121,8 +121,8 @@ router.post('/', auth, async (req, res) => {
     });
 
     await message.save();
-    await message.populate('sender', 'username avatar');
-    await message.populate('recipient', 'username avatar');
+    await message.populate('sender', 'username name avatar');
+    await message.populate('recipient', 'username name avatar');
 
     // Sanitize avatars
     const sanitizedMessage = message.toObject();

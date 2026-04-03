@@ -52,6 +52,7 @@ router.post('/register', [
         id: user._id,
         email: user.email,
         username: user.username,
+        name: user.name,
         avatar: user.avatar,
         bio: user.bio
       }
@@ -101,6 +102,7 @@ router.post('/login', [
         id: user._id,
         email: user.email,
         username: user.username,
+        name: user.name,
         avatar: user.avatar,
         bio: user.bio
       }
@@ -116,8 +118,8 @@ router.get('/me', auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId)
       .select('-password')
-      .populate('connections', 'username avatar')
-      .populate('connectionRequests', 'username avatar')
+      .populate('connections', 'username name avatar')
+      .populate('connectionRequests', 'username name avatar')
       .populate('followedPages', 'name avatar');
     
     const sanitizedUser = sanitizeUserAvatar(user);
@@ -140,9 +142,12 @@ router.get('/search/users', async (req, res) => {
     }
 
     const users = await User.find({
-      username: { $regex: q, $options: 'i' }
+      $or: [
+        { username: { $regex: q, $options: 'i' } },
+        { name: { $regex: q, $options: 'i' } }
+      ]
     })
-      .select('username avatar')
+      .select('username name avatar')
       .limit(10);
 
     res.json(sanitizeUsersAvatars(users));
@@ -157,7 +162,7 @@ router.get('/:username', async (req, res) => {
   try {
     const user = await User.findOne({ username: req.params.username })
       .select('-password -email')
-      .populate('connections', 'username avatar');
+      .populate('connections', 'username name avatar');
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -178,10 +183,11 @@ router.get('/:username', async (req, res) => {
 // Update user profile
 router.put('/profile', auth, async (req, res) => {
   try {
-    const { bio } = req.body;
+    const { bio, name } = req.body;
     const user = await User.findById(req.userId);
 
     if (bio !== undefined) user.bio = bio;
+    if (name !== undefined) user.name = name;
 
     await user.save();
 
@@ -189,6 +195,7 @@ router.put('/profile', auth, async (req, res) => {
       id: user._id,
       email: user.email,
       username: user.username,
+      name: user.name,
       avatar: user.avatar,
       bio: user.bio
     });

@@ -63,7 +63,7 @@ router.post('/', auth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'v
       await Page.findByIdAndUpdate(pageId, { $push: { posts: post._id } });
     }
     
-    await post.populate('author', 'username avatar');
+    await post.populate('author', 'username name avatar');
     
     // If posted as page, also populate page info
     if (post.postedAsPage && post.postedOnPage) {
@@ -85,19 +85,19 @@ router.get('/feed', auth, async (req, res) => {
 
     const posts = await Post.find({ author: { $in: connectionIds } })
       .sort({ createdAt: -1 })
-      .populate('author', 'username avatar')
+      .populate('author', 'username name avatar')
       .populate('postedOnPage', 'name avatar')
       .populate({
         path: 'originalPost',
-        populate: { path: 'author', select: 'username avatar' }
+        populate: { path: 'author', select: 'username name avatar' }
       })
       .populate({
         path: 'comments',
         populate: [
-          { path: 'author', select: 'username avatar' },
+          { path: 'author', select: 'username name avatar' },
           {
             path: 'replies',
-            populate: { path: 'author', select: 'username avatar' }
+            populate: { path: 'author', select: 'username name avatar' }
           }
         ]
       })
@@ -121,19 +121,19 @@ router.get('/user/:username', async (req, res) => {
 
     const posts = await Post.find({ author: user._id })
       .sort({ createdAt: -1 })
-      .populate('author', 'username avatar')
+      .populate('author', 'username name avatar')
       .populate('postedOnPage', 'name avatar')
       .populate({
         path: 'originalPost',
-        populate: { path: 'author', select: 'username avatar' }
+        populate: { path: 'author', select: 'username name avatar' }
       })
       .populate({
         path: 'comments',
         populate: [
-          { path: 'author', select: 'username avatar' },
+          { path: 'author', select: 'username name avatar' },
           {
             path: 'replies',
-            populate: { path: 'author', select: 'username avatar' }
+            populate: { path: 'author', select: 'username name avatar' }
           }
         ]
       });
@@ -149,19 +149,19 @@ router.get('/user/:username', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
-      .populate('author', 'username avatar')
+      .populate('author', 'username name avatar')
       .populate('postedOnPage', 'name avatar')
       .populate({
         path: 'originalPost',
-        populate: { path: 'author', select: 'username avatar' }
+        populate: { path: 'author', select: 'username name avatar' }
       })
       .populate({
         path: 'comments',
         populate: [
-          { path: 'author', select: 'username avatar' },
+          { path: 'author', select: 'username name avatar' },
           {
             path: 'replies',
-            populate: { path: 'author', select: 'username avatar' }
+            populate: { path: 'author', select: 'username name avatar' }
           }
         ]
       });
@@ -194,7 +194,7 @@ router.put('/:id', auth, async (req, res) => {
     post.updatedAt = Date.now();
 
     await post.save();
-    await post.populate('author', 'username avatar');
+    await post.populate('author', 'username name avatar');
     await post.populate('postedOnPage', 'name avatar');
 
     res.json(post);
@@ -264,24 +264,24 @@ router.post('/:id/share', auth, async (req, res) => {
     await sharedPost.save();
     
     // Populate all required fields
-    await sharedPost.populate('author', 'username avatar');
+    await sharedPost.populate('author', 'username name avatar');
     if (sharedPost.postedOnPage) {
       await sharedPost.populate('postedOnPage', 'name avatar');
     }
     await sharedPost.populate({
       path: 'originalPost',
       populate: [
-        { path: 'author', select: 'username avatar' },
+        { path: 'author', select: 'username name avatar' },
         { path: 'postedOnPage', select: 'name avatar' }
       ]
     });
     await sharedPost.populate({
       path: 'comments',
       populate: [
-        { path: 'author', select: 'username avatar' },
+        { path: 'author', select: 'username name avatar' },
         {
           path: 'replies',
-          populate: { path: 'author', select: 'username avatar' }
+          populate: { path: 'author', select: 'username name avatar' }
         }
       ]
     });

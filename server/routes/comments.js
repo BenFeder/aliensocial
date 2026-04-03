@@ -35,7 +35,7 @@ router.post('/', auth, async (req, res) => {
     });
 
     await comment.save();
-    await comment.populate('author', 'username avatar');
+    await comment.populate('author', 'username name avatar');
 
     // If it's a reply, add to parent's replies array
     if (parentCommentId) {
@@ -87,7 +87,7 @@ router.put('/:id', auth, async (req, res) => {
     comment.updatedAt = Date.now();
 
     await comment.save();
-    await comment.populate('author', 'username avatar');
+    await comment.populate('author', 'username name avatar');
 
     res.json(comment);
   } catch (error) {
@@ -144,12 +144,12 @@ router.get('/post/:postId', async (req, res) => {
       parentComment: null 
     })
       .sort({ createdAt: -1 })
-      .populate('author', 'username avatar')
+      .populate('author', 'username name avatar')
       .populate({
         path: 'replies',
         populate: {
           path: 'author',
-          select: 'username avatar'
+          select: 'username name avatar'
         },
         options: { sort: { createdAt: 1 } }
       });

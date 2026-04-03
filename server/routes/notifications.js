@@ -8,7 +8,7 @@ const { sanitizeUserAvatar } = require('../utils/avatarHelper');
 router.get('/', auth, async (req, res) => {
   try {
     const notifications = await Notification.find({ recipient: req.userId })
-      .populate('sender', 'username avatar')
+      .populate('sender', 'username name avatar')
       .populate('post')
       .sort({ createdAt: -1 })
       .limit(50);

@@ -96,7 +96,10 @@ const SearchBar = () => {
                         alt={user.username}
                         className="search-result-avatar"
                       />
-                      <span>{user.username}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontWeight: '500' }}>{user.username}</span>
+                        {user.name && <span style={{ fontSize: '0.85rem', color: '#666' }}>{user.name}</span>}
+                      </div>
                     </div>
                   ))}
                 </>

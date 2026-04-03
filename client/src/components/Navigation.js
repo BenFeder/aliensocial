@@ -18,10 +18,10 @@ const Navigation = () => {
   };
 
   return (
+    <>
     <nav>
       <div className="nav-container">
         <Link to="/" className="logo">AlienSocialNetwork.com</Link>
-        {user && <SearchBar />}
         
         {/* Hamburger menu button for mobile */}
         <button 
@@ -54,6 +54,12 @@ const Navigation = () => {
         </ul>
       </div>
     </nav>
+    {user && (
+      <div className="search-bar-wrapper">
+        <SearchBar />
+      </div>
+    )}
+    </>
   );
 };
 

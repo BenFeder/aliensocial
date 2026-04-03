@@ -13,8 +13,9 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [avatarFile, setAvatarFile] = useState(null);
   const [showAvatarEditor, setShowAvatarEditor] = useState(false);
+  const [name, setName] = useState('');
   const [bio, setBio] = useState('');
-  const [editingBio, setEditingBio] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -24,6 +25,7 @@ const Profile = () => {
     try {
       const userResponse = await authAPI.getUserByUsername(username);
       setUser(userResponse.data);
+      setName(userResponse.data.name || '');
       setBio(userResponse.data.bio || '');
 
       const postsResponse = await postsAPI.getUserPosts(username);
@@ -68,14 +70,14 @@ const Profile = () => {
     setShowAvatarEditor(false);
   };
 
-  const handleUpdateBio = async () => {
+  const handleUpdateProfile = async () => {
     try {
-      await authAPI.updateProfile({ bio });
-      setUser({ ...user, bio });
-      setEditingBio(false);
-      alert('Bio updated successfully!');
+      await authAPI.updateProfile({ name, bio });
+      setUser({ ...user, name, bio });
+      setEditingProfile(false);
+      alert('Profile updated successfully!');
     } catch (error) {
-      console.error('Error updating bio:', error);
+      console.error('Error updating profile:', error);
     }
   };
 
@@ -136,26 +138,44 @@ const Profile = () => {
         />
         <div className="profile-info">
           <h1>{user.username}</h1>
+          {user.name && <h2 style={{ marginTop: '0.25rem', color: '#666', fontWeight: 'normal' }}>{user.name}</h2>}
           
-          {editingBio && isOwnProfile ? (
-            <div>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                maxLength="500"
-                style={{ width: '100%', marginBottom: '0.5rem' }}
-              />
-              <button onClick={handleUpdateBio}>Save Bio</button>
-              <button onClick={() => setEditingBio(false)} className="btn-secondary" style={{ marginLeft: '0.5rem' }}>
-                Cancel
-              </button>
+          {editingProfile && isOwnProfile ? (
+            <div style={{ marginTop: '1rem' }}>
+              <div style={{ marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: '600' }}>Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  maxLength="100"
+                  placeholder="Enter your name"
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: '600' }}>Bio</label>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  maxLength="500"
+                  placeholder="Tell us about yourself"
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd', minHeight: '80px' }}
+                />
+              </div>
+              <div style={{ marginTop: '0.75rem' }}>
+                <button onClick={handleUpdateProfile}>Save Profile</button>
+                <button onClick={() => setEditingProfile(false)} className="btn-secondary" style={{ marginLeft: '0.5rem' }}>
+                  Cancel
+                </button>
+              </div>
             </div>
           ) : (
             <div className="profile-bio">
               {user.bio || 'No bio yet'}
               {isOwnProfile && (
-                <button onClick={() => setEditingBio(true)} style={{ marginLeft: '1rem', padding: '0.3rem 0.8rem' }}>
-                  Edit Bio
+                <button onClick={() => setEditingProfile(true)} style={{ marginLeft: '1rem', padding: '0.3rem 0.8rem' }}>
+                  Edit Profile
                 </button>
               )}
             </div>
