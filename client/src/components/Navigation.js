@@ -21,7 +21,7 @@ const Navigation = () => {
     <>
     <nav>
       <div className="nav-container">
-        <Link to="/" className="logo">AlienSocialNetwork</Link>
+        <Link to="/" className="logo">Alien Social Network</Link>
         
         {/* Hamburger menu button for mobile */}
         <button 
