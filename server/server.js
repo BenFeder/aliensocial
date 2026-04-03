@@ -62,10 +62,6 @@ if (!isServerless) {
   
   // Serve static files
   app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-  // Serve logo from root directory
-  app.get('/ASNlogo.png', (req, res) => {
-    res.sendFile(path.join(__dirname, '../ASNlogo.png'));
-  });
 }
 
 // Routes

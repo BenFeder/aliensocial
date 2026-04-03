@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from '../api';
+import axios, { getImageUrl } from '../api';
 import '../styles/MentionInput.css';
 
 const MentionInput = ({ value, onChange, placeholder, className }) => {
@@ -213,7 +213,7 @@ const MentionInput = ({ value, onChange, placeholder, className }) => {
               onMouseEnter={() => setSelectedIndex(index)}
             >
               <img 
-                src={suggestion.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(suggestion.name || suggestion.username)}&background=39ff14&color=000`}
+                src={getImageUrl(suggestion.avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(suggestion.name || suggestion.username)}&background=39ff14&color=000`}
                 alt={suggestion.name || suggestion.username}
                 className="mention-avatar"
               />
